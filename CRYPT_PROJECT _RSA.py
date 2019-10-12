@@ -1,27 +1,3 @@
-try:
-   input = raw_input
-except NameError:
-   pass
-try:
-   chr = unichr
-except NameError:
-   pass
-
-def egcd(a, b):
-    if a == 0:
-        return b, 0, 1
-    else:
-        g, y, x = egcd(b % a, a)
-        return g, x - (b // a) * y, y
-
-
-def modinv(a, m):
-    g, x, y = egcd(a, m)
-    if g != 1:
-        raise Exception('modular inverse does not exist')
-    else:
-        return x % m
-
 p=int(input('Enter prime p: '))
 q=int(input('Enter prime q: '))
 print("Choosen primes:\np=" + str(p) + ", q=" + str(q) + "\n")
@@ -35,6 +11,18 @@ def gcd(a, b):
         a = b
         b = c
     return a
+def egcd(a, b):
+    if a == 0:
+        return b, 0, 1
+    else:
+        g, y, x = egcd(b % a, a)
+        return g, x - (b // a) * y, y
+def modinv(a, m):
+    g, x, y = egcd(a, m)
+    if g != 1:
+        raise Exception('modular inverse does not exist')
+    else:
+        return x % m
 def coprimes(a):
     l = []
     for x in range(2, a):
@@ -45,42 +33,46 @@ def coprimes(a):
             l.remove(x)
     return l
 import random
-ui=coprimes(phi)
-e=ui[random.randint(int(len(ui)/2),len(ui))]
-d=modinv(e,phi)
+#print("Choose an e from a below coprimes array:\n")
+#print(str(coprimes(phi)) + "\n")
+l=coprimes(phi)
+w=random.randint(0,len(coprimes(phi))-1)
 
-c=131
-d=113
-n1=c*d
-ph=(d-1)*(c-1)
-v=coprimes(ph)
-a=ui[random.randint(int(len(v)/2),len(v))]
-b=modinv(a,ph)
-def enc(c):
-   c1=modinv(c**a,n1)
-   return c1
-def dec(c):
-   c1=modinv(c**b,n1)
-   return c1
-A=enc(e)
-B=enc(d)
-print("\nYour public key is a pair of numbers (A=" + str(A) + ", n=" + str(n) + ").\n")
-print("Your private key is a pair of numbers (B=" + str(B) + ", n=" + str(n) + ").\n")
-def encrypt_block(m):
-    c = modinv(m**(dec(A)), n)
+e=l[w]
+d=modinv(e,phi)
+p1=113
+q1=131
+n1=p1*q1
+ph1=(p1-1)*(q1-1)
+l1=coprimes(ph1)
+e1=l1[random.randint(0,len(coprimes(ph1)))]
+d1=modinv(e1,ph1)
+
+def encrypt_block(m,e,n):
+    c = modinv(m**e, n)
     if c == None: print('No modular multiplicative inverse for block ' + str(m) + '.')
     return c
-def decrypt_block(c):
-    m = modinv(c**(dec(B)), n)
+def decrypt_block(c,d,n):
+    m = modinv(c**d, n)
     if m == None: print('No modular multiplicative inverse for block ' + str(c) + '.')
     return m
-def encrypt_string(s):
-    return ''.join([chr(encrypt_block(ord(x))) for x in list(s)])
-def decrypt_string(s):
-    return ''.join([chr(decrypt_block(ord(x))) for x in list(s)])
+def encrypt_string(s,e,n):
+    return ''.join([chr(encrypt_block(ord(x),e,n)) for x in list(s)])
+def decrypt_string(s,d,n):
+    return ''.join([chr(decrypt_block(ord(x),d,n)) for x in list(s)])
+
+e2=encrypt_block(e,e1,n1)
+d2=encrypt_block(d,e1,n1)
+print("public key = ",e1,n-1,e2)
+print("private key= ",d1,n-1,d2)
+
 s = input("Enter a message to encrypt: ")
 print("\nPlain message: " + s + "\n")
-enc = encrypt_string(s)
+e3=decrypt_block(e2,d1,n1)
+print(e,e1,e2,e3)
+enc = encrypt_string(s,e3,n)
 print("Encrypted message: " + enc + "\n")
-dec = decrypt_string(enc)
+d3=decrypt_block(d2,d1,n1)
+print(d,d1,d2,d3)
+dec = decrypt_string(enc,d3,n)
 print("Decrypted message: " + dec + "\n")
