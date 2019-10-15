@@ -5,7 +5,7 @@ encrypted_text = "messageIsVeryLargeOrVeryVeryLArge"
 def salt(text):
     temp = ""
     j = 0
-    salt = "govinda K"
+    salt = "ezioishan"
     for i in range(len(text)):
         if(i%2):
             temp += text[i]
